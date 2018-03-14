@@ -9,6 +9,7 @@ This is the launcher for our Team17 RPI3 device (though it could be used for any
   * Spotify
   * Settings
   * Team17 Bluetooth Setup App
+* Layout XML has been optimized for RPI3 output to an external monitor/TV through HDMI, so scalaing and sizes may be off on different devices
 
 ## Install Notes ##
 When running the app from Android Studio, in order to prevent the "No Default Activity" error when running: 
