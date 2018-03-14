@@ -1,7 +1,14 @@
 # MapsLauncher
 This is the launcher for our Team17 RPI3 device (though it could be used for any android device)
 
-There is no GPS support currently, only a default location to demonstrate map functionality. Actual location support is in the works.
+## Limitations ##
+* There is no GPS support currently, only a default location to demonstrate map functionality.
+  * Actual location support is in the works, limited by RPI3 location issues currently.
+* Only selects from our list of installed apps (more can easily be added if desired) which include:
+  * Google Play Store
+  * Spotify
+  * Settings
+  * Team17 Bluetooth Setup App
 
 ## Install Notes ##
 When running the app from Android Studio, in order to prevent the "No Default Activity" error when running: 
