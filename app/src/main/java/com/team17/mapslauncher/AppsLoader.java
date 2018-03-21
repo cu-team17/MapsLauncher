@@ -17,18 +17,21 @@ import java.util.List;
  * @credit http://developer.android.com/reference/android/content/AsyncTaskLoader.html
  */
 public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
-    ArrayList<AppModel> mInstalledApps;
-    final ArrayList<String> desiredApps = new ArrayList<String>(Arrays.asList(
+    private ArrayList<AppModel> mInstalledApps;
+    private final ArrayList<String> desiredApps = new ArrayList<String>(Arrays.asList(
             "com.spotify.music",
             "com.spotify.mobile.android.ui",
             "com.android.settings",
-            "com.android.vending",
-            "cuteam17.cuteam17rpi"));
+            "cuteam17.cuteam17rpi",
+            "com.android.contacts",
+            "com.android.chrome",
+            "com.google.android.calendar",
+            "com.android.vending"));
 
-    final PackageManager mPm;
-    PackageIntentReceiver mPackageObserver;
+    private final PackageManager mPm;
+    private PackageIntentReceiver mPackageObserver;
 
-    public AppsLoader(Context context) {
+    AppsLoader(Context context) {
         super(context);
 
         mPm = context.getPackageManager();
@@ -41,14 +44,18 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
 
         List<ApplicationInfo> apps = mPm.getInstalledApplications(0);
         ArrayList<AppModel> items = new ArrayList<AppModel>(4);
+        int counter = 0;
         for (String i : desiredApps) {
             try {
                 AppModel app = new AppModel(context, mPm.getApplicationInfo(i, 0));
                 app.loadLabel(context);
                 items.add(app);
+                counter++;
             } catch (PackageManager.NameNotFoundException e) {
                 Log.d("MapsLauncher", "Application: " + i + "not found.");
             }
+            // TODO: reduce desiredApps list to only 4 apps and remove counter
+            if (counter == 4) break;
         }
 
         // sort the list
