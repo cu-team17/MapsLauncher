@@ -29,7 +29,8 @@
             android:layout_marginRight="192px"
             android:layout_marginBottom="16px"
             android:layout_marginTop="16px"
-            android:layout_centerInParent="true">
+            android:layout_centerInParent="true"
+            android:id="@+id/cardView">
 
             <fragment
                 android:layout_width="wrap_content"
@@ -60,12 +61,36 @@
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="960px"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
         android:background="@color/cardview_dark_background"
-        android:id="@+id/right_space">
+        tools:context=".MapsActivity"
+        tools:ignore="PxUsage">
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/music_widget"
+            android:layout_width="320px"
+            android:layout_height="280px"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="16dp"
+            android:background="@color/cardview_dark_background"
+            android:orientation="vertical"></LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/weather_widget"
+            android:layout_width="320px"
+            android:layout_height="300px"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:background="@color/cardview_dark_background"
+            android:orientation="vertical"></LinearLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>

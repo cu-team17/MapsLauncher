@@ -34,10 +34,18 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.Intent;
+import android.widget.LinearLayout;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -52,11 +60,58 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationCallback mLocationCallback;
     private FusedLocationProviderClient mFusedLocationClient;
 
+    LinearLayout weatherWidget;
+    LinearLayout musicWidget;
+
+    AppWidgetManager mAppWidgetManager;
+    AppWidgetHost mAppWidgetHost;
+
+    int REQUEST_BIND_WIDGET = 111;
+
+    AppWidgetProviderInfo weatherWidgetInfo;
+    AppWidgetProviderInfo spotifyWidgetInfo;
+
+    int weatherWidgetId;
+    int spotifyWidgetId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homescreen);
         updateValuesFromBundle(savedInstanceState);
+
+        mAppWidgetManager = AppWidgetManager.getInstance(this);
+        mAppWidgetHost = new AppWidgetHost(this, R.id.APPWIDGET_HOST_ID);
+
+        weatherWidget = (LinearLayout) findViewById(R.id.weather_widget);
+        musicWidget = (LinearLayout) findViewById(R.id.music_widget);
+
+        weatherWidgetInfo = new AppWidgetProviderInfo();
+        spotifyWidgetInfo = new AppWidgetProviderInfo();
+
+        weatherWidgetId = mAppWidgetHost.allocateAppWidgetId();
+        spotifyWidgetId = mAppWidgetHost.allocateAppWidgetId();
+
+        List<AppWidgetProviderInfo> appWidgetInfos = new ArrayList<AppWidgetProviderInfo>();
+        appWidgetInfos = mAppWidgetManager.getInstalledProviders();
+
+        //Getting the appInfo for each widget
+        for(int j = 0; j < appWidgetInfos.size(); j++)
+        {
+            //Gets the app info for the Spotify widget
+            if (appWidgetInfos.get(j).provider.getPackageName().equals("com.spotify.music") && appWidgetInfos.get(j).provider.getClassName().equals("com.spotify.music.spotlets.widget.SpotifyWidget"))
+            {
+                spotifyWidgetInfo = appWidgetInfos.get(j);
+                createSpotifyWidget(spotifyWidgetId);
+            }
+
+            //Gets the app info for the weather widget
+            if (appWidgetInfos.get(j).provider.getPackageName().equals("com.graph.weather.forecast.channel") && appWidgetInfos.get(j).provider.getClassName().equals("com.graph.weather.forecast.channel.widgets.WidgetProviderTrans"))
+            {
+                weatherWidgetInfo = appWidgetInfos.get(j);
+                createWeatherWidget(weatherWidgetId);
+            }
+        }
 
         // Default location (Engineering Center at CU)
         loc = new Location("Default");
@@ -113,6 +168,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 updateUI();
             }
         };
+    }
+
+    //Creates the Spotify widget
+    public void createSpotifyWidget(int spotifyWidgetId) {
+        AppWidgetHostView hostView = mAppWidgetHost.createView(this, spotifyWidgetId, spotifyWidgetInfo);
+        hostView.setAppWidget(spotifyWidgetId, spotifyWidgetInfo);
+        musicWidget.addView(hostView);
+    }
+
+    //Creates the Weather widget
+    public void createWeatherWidget(int weatherWidgetId) {
+        AppWidgetHostView hostView = mAppWidgetHost.createView(this, weatherWidgetId, weatherWidgetInfo);
+        hostView.setAppWidget(weatherWidgetId, weatherWidgetInfo);
+        weatherWidget.addView(hostView);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAppWidgetHost.startListening();
+
+        //Creates the intent for the weather widget to allow it to update
+        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, weatherWidgetId);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, weatherWidgetInfo.provider);
+        startActivityForResult(intent, REQUEST_BIND_WIDGET);
+
+        //Creates the intent for the spotify widget to allow it to update
+        Intent intent2 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+        intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, spotifyWidgetId);
+        intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, spotifyWidgetInfo.provider);
+        startActivityForResult(intent2, REQUEST_BIND_WIDGET);
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAppWidgetHost.stopListening();
     }
 
     @Override
