@@ -73,11 +73,8 @@
         <LinearLayout
             android:id="@+id/music_widget"
             android:layout_width="320px"
-            android:layout_height="280px"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="16dp"
+            android:layout_height="230px"
+            android:layout_above="@id/weather_widget"
             android:background="@color/cardview_dark_background"
             android:orientation="vertical"></LinearLayout>
 
