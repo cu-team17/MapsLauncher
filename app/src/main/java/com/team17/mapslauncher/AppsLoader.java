@@ -23,9 +23,7 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
             "com.spotify.mobile.android.ui",
             "com.android.settings",
             "cuteam17.cuteam17rpi",
-            "com.android.contacts",
             "com.android.chrome",
-            "com.google.android.calendar",
             "com.android.vending"));
 
     private final PackageManager mPm;
@@ -42,8 +40,7 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
         // retrieve the list of installed applications
         final Context context = getContext();
 
-        List<ApplicationInfo> apps = mPm.getInstalledApplications(0);
-        ArrayList<AppModel> items = new ArrayList<AppModel>(4);
+        ArrayList<AppModel> items = new ArrayList<AppModel>(3);
         int counter = 0;
         for (String i : desiredApps) {
             try {
@@ -55,7 +52,7 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
                 Log.d("MapsLauncher", "Application: " + i + "not found.");
             }
             // TODO: reduce desiredApps list to only 4 apps and remove counter
-            if (counter == 4) break;
+            if (counter == 3) break;
         }
 
         // sort the list

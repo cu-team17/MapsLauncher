@@ -20,8 +20,8 @@
               android:layout_height="match_parent">
 
     <ImageView android:id="@+id/icon"
-               android:layout_width="42dp"
-               android:layout_height="42dp"
+               android:layout_width="48dp"
+               android:layout_height="48dp"
                android:layout_gravity="center_horizontal"/>
 
     <TextView android:id="@+id/text"
@@ -31,7 +31,7 @@
               android:ellipsize="end"
               android:singleLine="true"
               android:gravity="center"
-              android:textColor="@android:color/white"
+              android:textColor="@color/darkGray"
               android:textSize="12sp"
               />
 

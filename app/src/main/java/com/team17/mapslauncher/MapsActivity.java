@@ -1,21 +1,34 @@
 package com.team17.mapslauncher;
 
 import android.Manifest;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -24,6 +37,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,31 +49,27 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import android.appwidget.AppWidgetHost;
-import android.appwidget.AppWidgetHostView;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
-import android.content.Intent;
-import android.widget.LinearLayout;
-
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
-    final private String REQUESTING_LOCATION_UPDATES_KEY = "theKey";
-    final private String MAP_LOG_TAG = "MapsLauncher";
+    final private static String REQUESTING_LOCATION_UPDATES_KEY = "theKey";
+    final private static String MAP_LOG_TAG = "MapsLauncher";
+    final private static int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private boolean mRequestingLocationUpdates = true;
     private GoogleMap mMap;
     private Location loc = new Location("Default");
+    private Place mPlace = null;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
     private FusedLocationProviderClient mFusedLocationClient;
+    private boolean mPlaceFound = false;
 
     LinearLayout weatherWidget;
     LinearLayout musicWidget;
@@ -83,20 +94,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.homescreen);
         updateValuesFromBundle(savedInstanceState);
 
+        // Default location (Engineering Center at CU)
+        loc = new Location("Default");
+        loc.setLatitude(40.007121);
+        loc.setLongitude(-105.263742);
+        loc.setTime(new Date().getTime());
+
+        FragmentManager fm = getSupportFragmentManager();
+
         mAppWidgetManager = AppWidgetManager.getInstance(this);
         mAppWidgetHost = new AppWidgetHost(this, R.id.APPWIDGET_HOST_ID);
 
         weatherWidget = (LinearLayout) findViewById(R.id.weather_widget);
         musicWidget = (LinearLayout) findViewById(R.id.music_widget);
-        speedWidget = (LinearLayout) findViewById(R.id.speed_widget);
+//        speedWidget = (LinearLayout) findViewById(R.id.speed_widget);
 
         weatherWidgetInfo = new AppWidgetProviderInfo();
         spotifyWidgetInfo = new AppWidgetProviderInfo();
-        speedometerWidgetInfo = new AppWidgetProviderInfo();
+//        speedometerWidgetInfo = new AppWidgetProviderInfo();
 
         weatherWidgetId = mAppWidgetHost.allocateAppWidgetId();
         spotifyWidgetId = mAppWidgetHost.allocateAppWidgetId();
-        speedometerWidgetId = mAppWidgetHost.allocateAppWidgetId();
+//        speedometerWidgetId = mAppWidgetHost.allocateAppWidgetId();
 
         List<AppWidgetProviderInfo> appWidgetInfos = new ArrayList<AppWidgetProviderInfo>();
         appWidgetInfos = mAppWidgetManager.getInstalledProviders();
@@ -108,11 +127,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            Log.d("WidgetInfo", "WidgetProviderInfo = " + appWidgetInfos);
 
             //Gets the app info for the speedometer widget
-            if (appWidgetInfos.get(j).provider.getPackageName().equals("it.opbyte.odometerwidget") && appWidgetInfos.get(j).provider.getClassName().equals("it.opbyte.odometerwidget.OdometerWidget_2x2"))
-            {
-                speedometerWidgetInfo = appWidgetInfos.get(j);
-                createSpeedometerWidget(speedometerWidgetId);
-            }
+//            if (appWidgetInfos.get(j).provider.getPackageName().equals("it.opbyte.odometerwidget") && appWidgetInfos.get(j).provider.getClassName().equals("it.opbyte.odometerwidget.OdometerWidget_2x2"))
+//            {
+//                speedometerWidgetInfo = appWidgetInfos.get(j);
+//                createSpeedometerWidget(speedometerWidgetId);
+//            }
 
             //Gets the app info for the Spotify widget
             if (appWidgetInfos.get(j).provider.getPackageName().equals("com.spotify.music") && appWidgetInfos.get(j).provider.getClassName().equals("com.spotify.music.spotlets.widget.SpotifyWidget"))
@@ -129,13 +148,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        // Default location (Engineering Center at CU)
-        loc = new Location("Default");
-        loc.setLatitude(40.007121);
-        loc.setLongitude(-105.263742);
-        loc.setTime(new Date().getTime());
-
-        FragmentManager fm = getSupportFragmentManager();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         createLocationRequest();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -184,14 +196,50 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 updateUI();
             }
         };
+
+        ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
+        searchButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_icon));
+        searchButton.setAdjustViewBounds(true);
+        searchButton.setMaxWidth(GridFragment.convertDpToPixels(52, this));
+        searchButton.setMaxHeight(GridFragment.convertDpToPixels(52, this));
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent =
+                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                                    .build(MapsActivity.this);
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+                } catch (GooglePlayServicesRepairableException e) {
+                    // TODO: Handle the error.
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    // TODO: Handle the error.
+                }
+            }
+        });
+
+        ImageButton currentLocationButton = (ImageButton) findViewById(R.id.current_location_button);
+        currentLocationButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.location_icon));
+        currentLocationButton.setAdjustViewBounds(true);
+        currentLocationButton.setMaxWidth(GridFragment.convertDpToPixels(52, this));
+        currentLocationButton.setMaxHeight(GridFragment.convertDpToPixels(52, this));
+        currentLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPlaceFound = false;
+                startLocationUpdates();
+            }
+        });
+
+
     }
 
-    //Creates the speedometer widget
-    public void createSpeedometerWidget(int speedometerWidgetId) {
-        AppWidgetHostView hostView = mAppWidgetHost.createView(this, speedometerWidgetId, speedometerWidgetInfo);
-        hostView.setAppWidget(speedometerWidgetId, speedometerWidgetInfo);
-        speedWidget.addView(hostView);
-    }
+//    //Creates the speedometer widget
+//    public void createSpeedometerWidget(int speedometerWidgetId) {
+//        AppWidgetHostView hostView = mAppWidgetHost.createView(this, speedometerWidgetId, speedometerWidgetInfo);
+//        hostView.setAppWidget(speedometerWidgetId, speedometerWidgetInfo);
+//        speedWidget.addView(hostView);
+//    }
 
     //Creates the Spotify widget
     public void createSpotifyWidget(int spotifyWidgetId) {
@@ -214,23 +262,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mAppWidgetHost.startListening();
 
         //Creates the intent for the weather widget to allow it to update
-        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, weatherWidgetId);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, weatherWidgetInfo.provider);
-        startActivityForResult(intent, REQUEST_BIND_WIDGET);
+        boolean weatherPermission = false;
+        weatherPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(weatherWidgetId, weatherWidgetInfo.provider); //Gives weather widget permission to access app info
+        if (!weatherPermission) {
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, weatherWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, weatherWidgetInfo.provider);
+            startActivityForResult(intent, REQUEST_BIND_WIDGET);
+        }
 
         //Creates the intent for the spotify widget to allow it to update
-        Intent intent2 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-        intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, spotifyWidgetId);
-        intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, spotifyWidgetInfo.provider);
-        startActivityForResult(intent2, REQUEST_BIND_WIDGET);
+        boolean spotifyPermission = false;
+        spotifyPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(spotifyWidgetId, spotifyWidgetInfo.provider); //Gives spotify widget permission to access app info
+        if (!spotifyPermission) {
+            Intent intent2 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, spotifyWidgetId);
+            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, spotifyWidgetInfo.provider);
+            startActivityForResult(intent2, REQUEST_BIND_WIDGET);
+        }
 
         //Creates the intent for the speedometer widget to allow it to update
-        Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-        intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, speedometerWidgetId);
-        intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, speedometerWidgetInfo.provider);
-        startActivityForResult(intent3, REQUEST_BIND_WIDGET);
+//        boolean speedometerPermission = false;
+//        speedometerPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(speedometerWidgetId, speedometerWidgetInfo.provider); //Gives speedometer widget permission to access app info
+//        if (!speedometerPermission) {
+//            Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+//            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, speedometerWidgetId);
+//            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, speedometerWidgetInfo.provider);
+//            startActivityForResult(intent3, REQUEST_BIND_WIDGET);
+//        }
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -240,9 +301,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        if (mRequestingLocationUpdates) {
+        if (mRequestingLocationUpdates && !mPlaceFound) {
+            Log.w(MAP_LOG_TAG, "On Resume Success");
             startLocationUpdates();
-        } else {
+        } else if (!mRequestingLocationUpdates && !mPlaceFound){
+            Log.w(MAP_LOG_TAG, "On resume apis");
             buildGoogleApiClient();
         }
     }
@@ -258,7 +321,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(Bundle bundle) {
-        startLocationUpdates();
+        if(mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
     }
 
     @Override
@@ -268,6 +333,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onPause() {
+        Log.i(MAP_LOG_TAG, "Paused");
         super.onPause();
         stopLocationUpdates();
     }
@@ -282,22 +348,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateUI() {
         String cityName = "unknown";
-        Log.i(MAP_LOG_TAG, "Updating UI with new location" + loc.toString());
-        LatLng ll = new LatLng(loc.getLatitude(), loc.getLongitude());
-        try {
-            List<Address> addressList = new Geocoder(getApplicationContext(), Locale.getDefault())
-                    .getFromLocation(ll.latitude, ll.longitude, 1);
-            if (addressList != null && addressList.size() > 0) {
-                cityName = addressList.get(0).getLocality();
+        LatLng ll;
+        if (!mPlaceFound) {
+            Log.i(MAP_LOG_TAG, "Updating UI with new location " + loc.toString());
+            ll = new LatLng(loc.getLatitude(), loc.getLongitude());
+        } else {
+            if (mPlace == null) {
+                Log.i(MAP_LOG_TAG, "Place was null");
+                return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            Log.i(MAP_LOG_TAG, "Updating UI with new place" + mPlace.toString());
+            ll = mPlace.getLatLng();
+            stopLocationUpdates();
         }
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions().position(ll)
-                .title("Marker in " + cityName));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
-        mMap.setMinZoomPreference(20.0f);
+        new GeocoderTask().execute(ll);
     }
 
 
@@ -341,6 +405,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     protected void requestLocationPermissions() {
+        Log.w(MAP_LOG_TAG, "Requesting permissions");
         String[] permissions = new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -349,12 +414,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(500);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     private void startLocationUpdates() {
+        Log.w(MAP_LOG_TAG, "Starting location updates");
         createLocationRequest();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED ||
@@ -391,5 +457,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                mPlaceFound = true;
+                mPlace = PlaceAutocomplete.getPlace(this, data);
+                Log.i(MAP_LOG_TAG, "Place: " + mPlace.getName());
+                updateUI();
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                // TODO: Handle the error.
+                Log.i(MAP_LOG_TAG, status.getStatusMessage());
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+        }
+    }
+
+    private class GeocoderTask extends AsyncTask<LatLng, Void, Address> {
+
+        @Override
+        protected Address doInBackground(LatLng... ll) {
+            try {
+                List<Address> addressList = new Geocoder(getApplicationContext(), Locale.getDefault())
+                        .getFromLocation(ll[0].latitude, ll[0].longitude, 1);
+                if (addressList != null && addressList.size() > 0) {
+                    return addressList.get(0);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Address address) {
+            if (address == null) {
+                return;
+            }
+            LatLng ll = new LatLng(address.getLatitude(), address.getLongitude());
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(ll)
+                    .title("Marker in " + address));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(ll));
+            mMap.setMinZoomPreference(18.0f);
+            Log.d(MAP_LOG_TAG, "Successfully moved camera");
+        }
     }
 }

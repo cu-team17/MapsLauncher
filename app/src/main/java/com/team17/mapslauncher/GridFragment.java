@@ -19,7 +19,6 @@ package com.team17.mapslauncher;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -128,10 +127,11 @@ public class GridFragment extends Fragment {
 //        lv.setColumnWidth(convertDpToPixels(5, getActivity()));
 //        lv.setBackgroundColor(Color.BLACK);
         lv.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-        lv.setNumColumns(4);
+        lv.setNumColumns(3);
         lv.setGravity(Gravity.CENTER);
-        lv.setHorizontalSpacing(convertDpToPixels(5, getActivity()));
-        lv.setPadding(0,5,0,0);
+//        lv.setHorizontalSpacing(convertDpToPixels(5, getActivity()));
+//        lv.setVerticalSpacing(convertDpToPixels(10, getActivity()));
+//        lv.setPadding(0,8,0,0);
 //        lv.setVerticalSpacing(convertDpToPixels(100, getActivity()));
         lv.setSmoothScrollbarEnabled(true);
 

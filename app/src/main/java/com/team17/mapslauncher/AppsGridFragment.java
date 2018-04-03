@@ -48,7 +48,7 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
             setGridShownNoAnimation(true);
         }
         AppsGridFragment f = (AppsGridFragment) getFragmentManager().findFragmentById(R.id.apps_grid);
-        f.getView().setBackgroundColor(Color.parseColor("#FF424242"));
+        f.getView().setBackgroundColor(Color.parseColor("#FFFCFCFC"));//Color.parseColor("#FF424242"));
         f.getView().setPadding(0,8,0,8);
     }
 
