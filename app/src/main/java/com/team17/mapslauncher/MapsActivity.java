@@ -73,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LinearLayout weatherWidget;
     LinearLayout musicWidget;
-    LinearLayout speedWidget;
+    LinearLayout clockWidget;
 
     AppWidgetManager mAppWidgetManager;
     AppWidgetHost mAppWidgetHost;
@@ -82,11 +82,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     AppWidgetProviderInfo weatherWidgetInfo;
     AppWidgetProviderInfo spotifyWidgetInfo;
-    AppWidgetProviderInfo speedometerWidgetInfo;
+    AppWidgetProviderInfo clockWidgetInfo;
 
     int weatherWidgetId;
     int spotifyWidgetId;
-    int speedometerWidgetId;
+    int clockWidgetId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,15 +107,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         weatherWidget = (LinearLayout) findViewById(R.id.weather_widget);
         musicWidget = (LinearLayout) findViewById(R.id.music_widget);
-//        speedWidget = (LinearLayout) findViewById(R.id.speed_widget);
+        clockWidget = (LinearLayout) findViewById(R.id.clock_widget);
 
         weatherWidgetInfo = new AppWidgetProviderInfo();
         spotifyWidgetInfo = new AppWidgetProviderInfo();
-//        speedometerWidgetInfo = new AppWidgetProviderInfo();
+        clockWidgetInfo = new AppWidgetProviderInfo();
 
         weatherWidgetId = mAppWidgetHost.allocateAppWidgetId();
         spotifyWidgetId = mAppWidgetHost.allocateAppWidgetId();
-//        speedometerWidgetId = mAppWidgetHost.allocateAppWidgetId();
+        clockWidgetId = mAppWidgetHost.allocateAppWidgetId();
 
         List<AppWidgetProviderInfo> appWidgetInfos = new ArrayList<AppWidgetProviderInfo>();
         appWidgetInfos = mAppWidgetManager.getInstalledProviders();
@@ -126,15 +126,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            Log.d("WidgetInfo", "appWidgetInfo Size = " + appWidgetInfos.size());
 //            Log.d("WidgetInfo", "WidgetProviderInfo = " + appWidgetInfos);
 
-            //Gets the app info for the speedometer widget
-//            if (appWidgetInfos.get(j).provider.getPackageName().equals("it.opbyte.odometerwidget") && appWidgetInfos.get(j).provider.getClassName().equals("it.opbyte.odometerwidget.OdometerWidget_2x2"))
-//            {
-//                speedometerWidgetInfo = appWidgetInfos.get(j);
-//                createSpeedometerWidget(speedometerWidgetId);
-//            }
+            if (appWidgetInfos.get(j).provider.getPackageName().equals("com.bestutilities.digitalclockwidget2018") && appWidgetInfos.get(j).provider.getClassName().equals("sk.michalec.SimpleDigiClockWidget.SimpleClockWidget2x5"))
+            {
+                clockWidgetInfo = appWidgetInfos.get(j);
+                createClockWidget(clockWidgetId);
+            }
+            //Gets the app info for the clock widget
 
             //Gets the app info for the Spotify widget
-            if (appWidgetInfos.get(j).provider.getPackageName().equals("com.spotify.music") && appWidgetInfos.get(j).provider.getClassName().equals("com.spotify.music.spotlets.widget.SpotifyWidget"))
+            if (appWidgetInfos.get(j).provider.getPackageName().equals("com.jackthakar.musicwidget") && appWidgetInfos.get(j).provider.getClassName().equals("com.jackthakar.musicwidget.TallWidget"))
             {
                 spotifyWidgetInfo = appWidgetInfos.get(j);
                 createSpotifyWidget(spotifyWidgetId);
@@ -234,12 +234,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-//    //Creates the speedometer widget
-//    public void createSpeedometerWidget(int speedometerWidgetId) {
-//        AppWidgetHostView hostView = mAppWidgetHost.createView(this, speedometerWidgetId, speedometerWidgetInfo);
-//        hostView.setAppWidget(speedometerWidgetId, speedometerWidgetInfo);
-//        speedWidget.addView(hostView);
-//    }
+    //Creates the clock widget
+    public void createClockWidget(int clockWidgetId) {
+        AppWidgetHostView hostView = mAppWidgetHost.createView(this, clockWidgetId, clockWidgetInfo);
+        hostView.setAppWidget(clockWidgetId, clockWidgetInfo);
+        clockWidget.addView(hostView);
+    }
 
     //Creates the Spotify widget
     public void createSpotifyWidget(int spotifyWidgetId) {
@@ -281,15 +281,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             startActivityForResult(intent2, REQUEST_BIND_WIDGET);
         }
 
-        //Creates the intent for the speedometer widget to allow it to update
-//        boolean speedometerPermission = false;
-//        speedometerPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(speedometerWidgetId, speedometerWidgetInfo.provider); //Gives speedometer widget permission to access app info
-//        if (!speedometerPermission) {
-//            Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-//            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, speedometerWidgetId);
-//            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, speedometerWidgetInfo.provider);
-//            startActivityForResult(intent3, REQUEST_BIND_WIDGET);
-//        }
+        //Creates the intent for the clock widget to allow it to update
+        boolean clockPermission = false;
+        clockPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(clockWidgetId, clockWidgetInfo.provider); //Gives clock widget permission to access app info
+        if (!clockPermission) {
+            Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, clockWidgetId);
+            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, clockWidgetInfo.provider);
+            startActivityForResult(intent3, REQUEST_BIND_WIDGET);
+        }
     }
 
     @Override
