@@ -148,6 +148,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
+        //Begin updating widgets
+        mAppWidgetHost.startListening();
+
+        //Creates the intent for the weather widget to allow it to update
+        boolean weatherPermission = false;
+        weatherPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(weatherWidgetId, weatherWidgetInfo.provider); //Gives weather widget permission to access app info
+        if (!weatherPermission) {
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, weatherWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, weatherWidgetInfo.provider);
+            startActivityForResult(intent, REQUEST_BIND_WIDGET);
+        }
+
+        //Creates the intent for the spotify widget to allow it to update
+        boolean spotifyPermission = false;
+        spotifyPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(spotifyWidgetId, spotifyWidgetInfo.provider); //Gives spotify widget permission to access app info
+        if (!spotifyPermission) {
+            Intent intent2 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, spotifyWidgetId);
+            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, spotifyWidgetInfo.provider);
+            startActivityForResult(intent2, REQUEST_BIND_WIDGET);
+        }
+
+        //Creates the intent for the clock widget to allow it to update
+        boolean clockPermission = false;
+        clockPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(clockWidgetId, clockWidgetInfo.provider); //Gives clock widget permission to access app info
+        if (!clockPermission) {
+            Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, clockWidgetId);
+            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, clockWidgetInfo.provider);
+            startActivityForResult(intent3, REQUEST_BIND_WIDGET);
+        }
+
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         createLocationRequest();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -231,7 +265,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-
     }
 
     //Creates the clock widget
@@ -255,43 +288,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         weatherWidget.addView(hostView);
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mAppWidgetHost.startListening();
-
-        //Creates the intent for the weather widget to allow it to update
-        boolean weatherPermission = false;
-        weatherPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(weatherWidgetId, weatherWidgetInfo.provider); //Gives weather widget permission to access app info
-        if (!weatherPermission) {
-            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, weatherWidgetId);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, weatherWidgetInfo.provider);
-            startActivityForResult(intent, REQUEST_BIND_WIDGET);
-        }
-
-        //Creates the intent for the spotify widget to allow it to update
-        boolean spotifyPermission = false;
-        spotifyPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(spotifyWidgetId, spotifyWidgetInfo.provider); //Gives spotify widget permission to access app info
-        if (!spotifyPermission) {
-            Intent intent2 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, spotifyWidgetId);
-            intent2.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, spotifyWidgetInfo.provider);
-            startActivityForResult(intent2, REQUEST_BIND_WIDGET);
-        }
-
-        //Creates the intent for the clock widget to allow it to update
-        boolean clockPermission = false;
-        clockPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(clockWidgetId, clockWidgetInfo.provider); //Gives clock widget permission to access app info
-        if (!clockPermission) {
-            Intent intent3 = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, clockWidgetId);
-            intent3.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, clockWidgetInfo.provider);
-            startActivityForResult(intent3, REQUEST_BIND_WIDGET);
-        }
-    }
-
+    //Stops updating the widgets when not on the launcher
     @Override
     protected void onStop() {
         super.onStop();
