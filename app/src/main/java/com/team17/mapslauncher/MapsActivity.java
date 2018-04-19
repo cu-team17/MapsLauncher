@@ -200,8 +200,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ImageButton searchButton = (ImageButton) findViewById(R.id.search_button);
         searchButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_icon));
         searchButton.setAdjustViewBounds(true);
-        searchButton.setMaxWidth(GridFragment.convertDpToPixels(52, this));
-        searchButton.setMaxHeight(GridFragment.convertDpToPixels(52, this));
+        searchButton.setMaxWidth(GridFragment.convertDpToPixels(64, this));
+        searchButton.setMaxHeight(GridFragment.convertDpToPixels(64, this));
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,8 +221,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ImageButton currentLocationButton = (ImageButton) findViewById(R.id.current_location_button);
         currentLocationButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.location_icon));
         currentLocationButton.setAdjustViewBounds(true);
-        currentLocationButton.setMaxWidth(GridFragment.convertDpToPixels(52, this));
-        currentLocationButton.setMaxHeight(GridFragment.convertDpToPixels(52, this));
+        currentLocationButton.setMaxWidth(GridFragment.convertDpToPixels(64, this));
+        currentLocationButton.setMaxHeight(GridFragment.convertDpToPixels(64, this));
         currentLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
