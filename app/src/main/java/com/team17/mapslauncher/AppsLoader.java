@@ -45,7 +45,7 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
         for (String i : desiredApps) {
             try {
                 AppModel app = new AppModel(context, mPm.getApplicationInfo(i, 0));
-                app.loadLabel(context);
+//                app.loadLabel(context);
                 items.add(app);
                 counter++;
             } catch (PackageManager.NameNotFoundException e) {
@@ -56,7 +56,7 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
         }
 
         // sort the list
-        Collections.sort(items, ALPHA_COMPARATOR);
+//        Collections.sort(items, ALPHA_COMPARATOR);
 
         return items;
     }
@@ -156,12 +156,12 @@ public class AppsLoader extends AsyncTaskLoader<ArrayList<AppModel>> {
     /**
      * Perform alphabetical comparison of application entry objects.
      */
-    public static final Comparator<AppModel> ALPHA_COMPARATOR = new Comparator<AppModel>() {
-        private final Collator sCollator = Collator.getInstance();
-        @Override
-        public int compare(AppModel object1, AppModel object2) {
-            return sCollator.compare(object1.getLabel(), object2.getLabel());
-        }
-    };
+//    public static final Comparator<AppModel> ALPHA_COMPARATOR = new Comparator<AppModel>() {
+//        private final Collator sCollator = Collator.getInstance();
+//        @Override
+//        public int compare(AppModel object1, AppModel object2) {
+//            return sCollator.compare(object1.getLabel(), object2.getLabel());
+//        }
+//    };
 
 }

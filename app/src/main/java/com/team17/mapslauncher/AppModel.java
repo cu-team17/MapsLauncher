@@ -63,16 +63,16 @@ public class AppModel {
     }
 
 
-    void loadLabel(Context context) {
-        if (mAppLabel == null || !mMounted) {
-            if (!mApkFile.exists()) {
-                mMounted = false;
-                mAppLabel = mInfo.packageName;
-            } else {
-                mMounted = true;
-                CharSequence label = mInfo.loadLabel(context.getPackageManager());
-                mAppLabel = label != null ? label.toString() : mInfo.packageName;
-            }
-        }
-    }
+//    void loadLabel(Context context) {
+//        if (mAppLabel == null || !mMounted) {
+//            if (!mApkFile.exists()) {
+//                mMounted = false;
+//                mAppLabel = mInfo.packageName;
+//            } else {
+//                mMounted = true;
+//                CharSequence label = mInfo.loadLabel(context.getPackageManager());
+//                mAppLabel = label != null ? label.toString() : mInfo.packageName;
+//            }
+//        }
+//    }
 }

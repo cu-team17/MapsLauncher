@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -505,4 +506,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d(MAP_LOG_TAG, "Successfully moved camera");
         }
     }
+
+    public void globeButton(View view)
+    {
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.android.chrome");
+        if (launchIntent != null) {
+            startActivity(launchIntent);
+        }
+    }
+
+    public void settingsButton(View view)
+    {
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.android.settings");
+        if (launchIntent != null) {
+            startActivity(launchIntent);
+        }
+    }
+
+    public void menuButton(View view) {
+        Toast.makeText(MapsActivity.this, "Menu coming soon...", Toast.LENGTH_SHORT).show();
+    }
+
 }

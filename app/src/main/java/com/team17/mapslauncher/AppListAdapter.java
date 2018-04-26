@@ -43,7 +43,7 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
 
         AppModel item = getItem(position);
         ((ImageView)view.findViewById(R.id.icon)).setImageDrawable(item.getIcon());
-        ((TextView)view.findViewById(R.id.text)).setText(item.getLabel());
+//        ((TextView)view.findViewById(R.id.text)).setText(item.getLabel());
 
         return view;
     }
