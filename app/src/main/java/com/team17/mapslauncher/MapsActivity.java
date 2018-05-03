@@ -289,6 +289,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         weatherWidget.addView(hostView);
     }
 
+    //Start updating the widgets
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAppWidgetHost.startListening();
+    }
+
     //Stops updating the widgets when not on the launcher
     @Override
     protected void onStop() {
